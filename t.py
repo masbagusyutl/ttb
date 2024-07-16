@@ -24,6 +24,7 @@ def countdown_timer(seconds):
         remaining_time = end_time - datetime.now()
         print(f"Time remaining: {remaining_time}", end='\r')
         time.sleep(1)
+    print("\nCountdown finished. Restarting tasks...")
 
 def convert_to_wib(unix_timestamp):
     utc_time = datetime.fromtimestamp(unix_timestamp, tz=timezone.utc)
@@ -38,7 +39,7 @@ def generate_clicks(total, parts):
     clicks = [cuts[0]] + [cuts[i] - cuts[i-1] for i in range(1, len(cuts))] + [total - cuts[-1]]
     return clicks
 
-def main():
+def process_accounts():
     data_lines = read_data('data.txt')
     total_accounts = len(data_lines)
     
@@ -58,9 +59,12 @@ def main():
             time.sleep(5)  # 5 seconds delay between tap-tap tasks
 
         print(f"Completed processing account {index + 1}")
-    
-    print("All accounts processed. Starting 20-minutes countdown.")
-    countdown_timer(1200)  # 20 minutes countdown
+
+def main():
+    while True:
+        process_accounts()
+        print("All accounts processed. Starting 20-minute countdown.")
+        countdown_timer(1200)  # 20 minute countdown
 
 if __name__ == "__main__":
     main()
