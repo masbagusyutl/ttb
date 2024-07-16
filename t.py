@@ -59,8 +59,8 @@ def main():
 
         print(f"Completed processing account {index + 1}")
     
-    print("All accounts processed. Starting 1-hour countdown.")
-    countdown_timer(3600)  # 1 hour countdown
+    print("All accounts processed. Starting 20-minutes countdown.")
+    countdown_timer(1200)  # 20 minutes countdown
 
 if __name__ == "__main__":
     main()
