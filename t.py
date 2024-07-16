@@ -31,8 +31,11 @@ def convert_to_wib(unix_timestamp):
     return wib_time
 
 def generate_clicks(total, parts):
-    clicks = [random.randint(1, total) for _ in range(parts - 1)]
-    clicks.append(total - sum(clicks))
+    if parts <= 1:
+        return [total]
+    
+    cuts = sorted(random.sample(range(1, total), parts - 1))
+    clicks = [cuts[0]] + [cuts[i] - cuts[i-1] for i in range(1, len(cuts))] + [total - cuts[-1]]
     return clicks
 
 def main():
