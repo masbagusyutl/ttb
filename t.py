@@ -74,8 +74,9 @@ def process_accounts():
 def main():
     while True:
         process_accounts()
-        print("All accounts processed. Starting 20-minute countdown.")
-        countdown_timer(1200)  # 20 minute countdown
+        random_countdown = random.randint(20, 300)  # Random countdown between 20 and 300 seconds (5 minutes)
+        print(f"All accounts processed. Starting {random_countdown}-second countdown.")
+        countdown_timer(random_countdown)  # Random countdown timer
 
 if __name__ == "__main__":
     main()
