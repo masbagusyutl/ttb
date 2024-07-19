@@ -2,19 +2,22 @@ import time
 import requests
 import random
 from datetime import datetime, timedelta, timezone
-from urllib.parse import unquote
+from urllib.parse import unquote, quote
+import hashlib
 
 def read_data(file_path):
     with open(file_path, 'r') as file:
         return file.read().splitlines()
 
+def write_data(file_path, data_lines):
+    with open(file_path, 'w') as file:
+        file.write("\n".join(data_lines))
+
 def get_authorization_header(data_line):
     return {"Authorization": data_line}
 
 def extract_username(auth_header):
-    # Decode the URL encoded string
     decoded_str = unquote(auth_header)
-    # Find the username part
     username_key = 'username":"'
     start_index = decoded_str.find(username_key) + len(username_key)
     end_index = decoded_str.find('"', start_index)
@@ -49,13 +52,30 @@ def generate_clicks(total, parts):
     clicks = [cuts[0]] + [cuts[i] - cuts[i-1] for i in range(1, len(cuts))] + [total - cuts[-1]]
     return clicks
 
+def update_auth_date_and_hash(data_line):
+    parts = data_line.split('&')
+    new_parts = []
+    for part in parts:
+        if part.startswith('auth_date='):
+            new_auth_date = int(time.time())
+            new_parts.append(f'auth_date={new_auth_date}')
+        elif part.startswith('hash='):
+            new_hash = hashlib.sha256(f"{new_auth_date}{random.random()}".encode()).hexdigest()
+            new_parts.append(f'hash={new_hash}')
+        else:
+            new_parts.append(part)
+    return '&'.join(new_parts)
+
 def process_accounts():
     data_lines = read_data('data.txt')
     total_accounts = len(data_lines)
     
     for index, line in enumerate(data_lines):
-        auth_header = get_authorization_header(line)
-        username = extract_username(line)
+        updated_line = update_auth_date_and_hash(line)
+        data_lines[index] = updated_line
+        
+        auth_header = get_authorization_header(updated_line)
+        username = extract_username(updated_line)
         last_click_time = int(time.time())  # Start with current time as UNIX timestamp
         
         print(f"Processing account {index + 1} of {total_accounts} ({username})")
@@ -70,6 +90,8 @@ def process_accounts():
             time.sleep(5)  # 5 seconds delay between tap-tap tasks
 
         print(f"Completed processing account {index + 1} ({username})")
+    
+    write_data('data.txt', data_lines)  # Write the updated data back to data.txt
 
 def main():
     while True:
